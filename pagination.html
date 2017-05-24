@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <title>{$title}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./public/libs/uikit/3.0.0-beta22/css/uikit.min.css" rel="stylesheet" type="text/css" />
+    <link href="public/static/bundle.min.css" rel="stylesheet" type="text/css" />
+    <link href="public/libs/datepicker/datepicker.css" rel="stylesheet" type="text/css" />
+    <link href="public/libs/umeditor/1.2.3/themes/default/css/umeditor.min.css" type="text/css" rel="stylesheet">
+    <script>
+        const CONST_LIBS_URL = "public/libs/";
+        const CONST_STATIC_URL = "public/static/";
+        const CONST_STATIC_IMG_URL = "public/static/img/";
+        const CONST_UMEDITOR_UPDATE_API = "";
+    </script>
+    <script type="text/javascript" src="public/libs/jquery/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="./public/libs/uikit/3.0.0-beta22/js/uikit.js"></script>
+    <script type="text/javascript" src="./public/libs/uikit/3.0.0-beta22/js/uikit-icons.min.js"></script>
+    <script type="text/javascript" src="public/static/bundle.min.js"></script>
+    <script type="text/javascript" src="./static/js/think.js"></script>
+    <script type="text/javascript" src="./static/js/validate.js"></script>
+    <script type="text/javascript" src="./static/js/unixtime.js"></script>
+    <script type="text/javascript" src="./static/js/utils.js"></script>
+    <script type="text/javascript" src="public/libs/datepicker/datepicker.js"></script>
+    <script type="text/javascript" src="public/libs/head/1.0.3/head.load.js"></script>
+    <script type="text/javascript" src="public/libs/umeditor/1.2.3/third-party/template.min.js"></script>
+    <!--<script type="text/javascript" src="./static/js/umeditor.config.js"></script>-->
+    <script type="text/javascript" src="public/libs/umeditor/1.2.3/umeditor.js"></script>
+    <style>
+        .content{
+            width:100%;
+            height:400px;
+            background: #ccc;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div class="p1"></div>
+    <div class="content"></div>
+    <div class="testpage"></div>
+    <button onclick="btn()">点击设置页数</button>
+</div>
+<script>
+    function Paginator() {
+        //接受总页数和当前页
+        var o = {};
+        var defaults = {
+            pageCount:1,         //总页数
+            current:1,            //当前页
+            count:1    //页码a标签的个数
+        };
+        var $pagebox;
+        var _flag;
+        //绑定事件
+        function bindClick() {
+            if(_flag){
+                var current;
+                var count = defaults.count;
+                $pagebox.find("a").unbind('click').bind('click',function () {
+                    if(($(this).index()) != 0 && ($(this).index()) != count){
+                        $(this).addClass('uk-text-success uk-text-bold').siblings().removeClass('uk-text-success uk-text-bold');
+                        current = $(this).html();
+                    }else if($(this).index() == 0){
+                        current = parseInt(defaults.current)-1;
+                        $pagebox.find('a').eq(current).addClass('uk-text-success uk-text-bold').siblings().removeClass('uk-text-success uk-text-bold');
+                    }else{
+                        current = parseInt(defaults.current)+1;
+                        $pagebox.find('a').eq(current).addClass('uk-text-success uk-text-bold').siblings().removeClass('uk-text-success uk-text-bold');
+                    }
+                    defaults.current = current;
+                    o.setCurrent(defaults.current);
+                });
+            }else{
+                var current = defaults.current;
+                $pagebox.find("a").unbind('click').bind('click',function () {
+                    if($(this).index() == 0){
+                        current--;
+                        if(current == 1){
+                            $pagebox.find('a').eq(0).addClass('uk-disabled').siblings().removeClass('uk-disabled');
+                        }
+                    }else{
+                        current++;
+                        if(current == defaults.pageCount){
+                            $pagebox.find('a').eq(1).addClass('uk-disabled').siblings().removeClass('uk-disabled');
+                        }
+                    }
+                    defaults.current = current;
+                    o.setCurrent(defaults.current);
+                });
+            }
+        }
+        //根据当前页赋予页码不同的值和格式
+        function changePageContent(current) {
+            var current = parseInt(current);
+            var pageCount = defaults.pageCount;
+            var $pagInation = $pagebox.find('a');
+            if(_flag){
+                //给html中的a赋值
+                //上一页和下一页  是否禁用
+                if(current == 1){
+                    $pagInation.eq(0).addClass('uk-disabled').siblings().removeClass('uk-disabled');
+                }else{
+                    $pagInation.eq(0).removeClass('uk-disabled');
+                }
+                if(current == pageCount){
+                    $pagebox.find('a:last-of-type').addClass('uk-disabled').siblings().removeClass('uk-disabled');
+                }else{
+                    $pagebox.find('a:last-of-type').removeClass('uk-disabled');
+                }
+                //总页数7到11页
+                if(pageCount > 6 && pageCount < 12){
+                    //根据当前页的不同值生成对应总页数的对应的格式
+                    if(current < 6){
+                        $pagInation.eq(1).html('1');
+                        $pagInation.eq(2).html('2').removeClass('uk-disabled');
+                        $pagInation.eq(3).html('3');
+                        $pagInation.eq(4).html('4');
+                        $pagInation.eq(5).html('5');
+                        $pagInation.eq(6).html('...').addClass('uk-disabled');
+                        $pagInation.eq(7).html(pageCount);
+                    }
+                    if(current-5 > 0 && (pageCount-current) > 4){
+                        $pagInation.eq(1).html('1');
+                        $pagInation.eq(2).html('...').addClass('uk-disabled');
+                        $pagInation.eq(3).html(current-1);
+                        $pagInation.eq(4).html(current);
+                        $pagInation.eq(5).html(current+1);
+                        $pagInation.eq(6).html('...').addClass('uk-disabled');
+                        $pagInation.eq(7).html(pageCount);
+                    }
+                    if(current > (pageCount-5)){
+                        $pagInation.eq(1).html('1');
+                        $pagInation.eq(2).html('...').addClass('uk-disabled');
+                        $pagInation.eq(3).html(pageCount-4);
+                        $pagInation.eq(4).html(pageCount-3);
+                        $pagInation.eq(5).html(pageCount-2);
+                        $pagInation.eq(6).html(pageCount-1).removeClass('uk-disabled');
+                        $pagInation.eq(7).html(pageCount);
+                    }
+                }
+                //总页数大于11页
+                if(pageCount > 11){
+                    //根据当前页的不同值生成对应总页数的对应的格式
+                    if(current < 10){
+                        for(var i=1;i<10;i++){
+                            $pagInation.eq(i).html(i);
+                        }
+                        $pagInation.eq(2).removeClass('uk-disabled');
+                        $pagInation.eq(10).html('...');
+                        $pagInation.eq(11).html(pageCount);
+                    }
+                    if(current > 9 && (pageCount-current) > 3 && (current-3) < (pageCount-8)){
+                        $pagInation.eq(1).html('1');
+                        $pagInation.eq(2).html('...').addClass('uk-disabled');
+                        $pagInation.eq(3).html(current-3);
+                        $pagInation.eq(4).html(current-2);
+                        $pagInation.eq(5).html(current-1);
+                        $pagInation.eq(6).html(current);
+                        $pagInation.eq(7).html(current+1);
+                        $pagInation.eq(8).html(current+2);
+                        $pagInation.eq(9).html(current+3);
+                        $pagInation.eq(10).html('...').addClass('uk-disabled');
+                        $pagInation.eq(11).html(pageCount);
+                    }
+                    if(current > (pageCount-9) && current > 9){
+                        $pagInation.eq(1).html('1');
+                        $pagInation.eq(2).html('...').addClass('uk-disabled');
+                        for(var i=3;i<12;i++){
+                            $pagInation.eq(i).html(pageCount-11+i);
+                        }
+                        $pagInation.eq(10).removeClass('uk-disabled');
+                    }
+                }
+                //给定初始化的页数样式
+                for(var i=0;i<$pagInation.length;i++){
+                    if($pagInation.eq(i).html() == current){
+                        $pagInation.eq(i).addClass('uk-text-success uk-text-bold').siblings().removeClass('uk-text-success uk-text-bold');
+                    }
+                }
+            }else{
+                if(current == 1){
+                    $pagInation.eq(0).addClass('uk-disabled').siblings().removeClass('uk-disabled');
+                }else{
+                    $pagInation.eq(0).removeClass('uk-disabled');
+                }
+                if(current == pageCount){
+                    $pagInation.eq(1).addClass('uk-disabled').siblings().removeClass('uk-disabled');
+                }else{
+                    $pagInation.eq(1).removeClass('uk-disabled');
+                }
+            }
+        }
+        //设置当前页和总页数 以及页码a标签的个数
+        o.setDefaults = function (pageCount,current,flag) {
+            _flag = flag;
+            if(pageCount){
+                defaults.pageCount = pageCount;
+            }
+            if(current){
+                defaults.current = current ;
+            }
+            if(defaults.pageCount < 7){
+                defaults.count = defaults.pageCount + 1;
+            }else{
+                defaults.count = defaults.pageCount < 12 ? 8 : 12;
+            }
+            o.init();
+            bindClick();
+        };
+        //设置总页数
+        o.setPageCount = function (pagecount) {
+            defaults.pageCount = pagecount;
+            if($pagebox){
+                $pagebox.empty();
+                if(pagecount){
+                    defaults.pageCount = pagecount;
+                }
+                if(defaults.pageCount < 7){
+                    defaults.count = defaults.pageCount + 1;
+                }else{
+                    defaults.count = defaults.pageCount < 12 ? 8 : 12;
+                }
+                o.init();
+                bindClick();
+            }
+        };
+        //返回总页数
+        o.getPageCount = function () {
+            return defaults.pageCount;
+        }
+        //设置当前页
+        o.setCurrent = function (current) {
+            defaults.current = current;
+            changePageContent(current);
+        };
+        //返回当前页
+        o.getCurrent = function () {
+            return defaults.current;
+        };
+        o.ele = function (param) {
+            $pagebox = param.pagebox;
+            $pagebox.css({
+                '-webkit-user-select':'none' ,
+                '-moz-user-select':'none' ,
+                '-ms-user-select':'none' ,
+                '-o-user-select':'none'
+            });
+        };
+        //生成html内容
+        o.init = function () {
+            var pageCount = defaults.pageCount;
+            var current = defaults.current;
+            if(pageCount > 1){
+                var html = "";
+                if(_flag){
+                    html += "<a class='uk-button uk-padding-small paginator-prev'><span uk-icon='icon: chevron-left'></span></a>";
+                    //根据总页数生成不同数量的页码
+                    //总页数7页以下
+                    if(pageCount<7){
+                        for(var i=1;i<=pageCount;i++){
+                            html += "<a class='uk-button uk-padding-small' style='width:46px;'>"+i+"</a>";
+                        }
+                    }
+                    //总页数7到11页
+                    if(pageCount>6 && pageCount<12){
+                        for(var i=1;i<=7;i++){
+                            html += "<a class='uk-button uk-padding-small' style='width:46px;'></a>";
+                        }
+                    }
+                    //总页数大于11页
+                    if(pageCount > 11){
+                        for(var i=1;i<=11;i++){
+                            html += "<a class='uk-button uk-padding-small' style='width:46px;'></a>";
+                        }
+                    }
+                    html += "<a class='uk-button uk-padding-small paginator-next'><span uk-icon='icon: chevron-right'></span></a>";
+                    $pagebox.append(html);
+                    changePageContent(current);
+                }else{
+                    $pagebox.addClass('uk-clearfix');
+                    html += "<a class='uk-button uk-padding-small uk-float-left paginator-prev'><span uk-icon='icon: chevron-left'></span></a>";
+                    html += "<a class='uk-button uk-padding-small uk-float-right paginator-next'><span uk-icon='icon: chevron-right'></span></a>";
+                    $pagebox.append(html);
+                    changePageContent(current);
+                }
+            }
+        };
+        return o;
+    }
+    //初始化分页 使用方法
+    var p = Paginator();
+    var p1 = Paginator();
+    /*console.log(p.getPageCount());
+    console.log(p1.getPageCount());*/
+    $pagebox = $('.testpage');    //定义一个div作为分页的容器
+    $page = $('.p1');
+    p.ele({
+        'pagebox' : $pagebox
+    });
+    p.setDefaults(11,4,true);
+    p1.ele({
+        'pagebox' : $page
+    });
+    p1.setDefaults(5,3,false);
+    function btn() {
+        p1.setPageCount(7);
+        /*console.log(p1.getPageCount());
+        console.log(p1.getCurrent());*/
+    }
+   /* console.log(p.getPageCount());
+    console.log(p.getCurrent());
+    console.log(p1.getPageCount());
+    console.log(p1.getCurrent());*/
+</script>
+</body>
+</html>
